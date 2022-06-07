@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=, initial-scale=1.0" />
+    <title>Ejercicio Usuarios Mapa</title>
+    <style>
+      #map {
+        height: 500px;
+        width: 50%;
+        min-width: 700px;
+        border: 2px solid black;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      //Ejercicio 1
+      async function obtenerUsers() {
+        await fetch("https://jsonplaceholder.typicode.com/users")
+          .then((response) => response.json())
+          .then((json) => (arrayUsers = json));
+
+        const mapa = new Map();
+        arrayUsers.forEach((element) => {
+          mapa.set(element.username, element.address.geo);
+        });
+
+        return mapa;
+      }
+      console.log("EJERCICIO 1: ");
+
+      //Ejercicio 2
+      console.log(
+        "EJERCICIO 2 - URL generada: https://maps.googleapis.com/maps/api/js?key=AIzaSyB7AhavSIKdHXy8aTenvv9pEzYzG5sz-DU&callback=initMap"
+      );
+      //Ejercicio 3 y ejercicio 4
+      async function load() {
+        const mapaUsers = await obtenerUsers();
+        console.log(mapaUsers);
+        let mapDiv = document.getElementById("map");
+        const mapOptions = {
+          zoom: 1.8,
+          center: new google.maps.LatLng(40.130152, -8.2019183),
+        };
+        //generar mapa
+        let map = new google.maps.Map(mapDiv, mapOptions);
+
+        map.addListener("click", function () {
+              let marker = new google.maps.Marker({
+                position: new google.maps.LatLng(
+                  parseFloat(40.130152),
+                  parseFloat(-8.2019183)
+                ),
+                map: map,
+                draggable: true,
+                animation: google.maps.Animation.DROP,
+              });
+          });
+
+        //añadir markers
+        mapaUsers.forEach((user) => {
+          let marker = new google.maps.Marker({
+            position: new google.maps.LatLng(
+              parseFloat(user.lng),
+              parseFloat(user.lat)
+            ),
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP,
+          });
+          marker.addListener("mouseover", function () {
+              marker.setAnimation(google.maps.Animation.BOUNCE);
+          });
+          marker.addListener("mouseout", function () {
+              marker.setAnimation(null);
+          });
+        });
+      }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7AhavSIKdHXy8aTenvv9pEzYzG5sz-DU&callback=load"></script>
+  </body>
+</html>
